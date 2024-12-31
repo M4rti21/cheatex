@@ -1,0 +1,23 @@
+#!/bin/sh
+
+compile() {
+    mkdir -p out
+    pdflatex "$1.tex"
+    mv "$1.pdf" out/
+    rm "$1.aux"
+    rm "$1.log"
+    rm "$1.out"
+}
+
+if [ $# -eq 0 ]; then
+    # for each file ending with .tex, do pdflatex {filename}
+    for tex_file in *.tex; do
+        if [ -f "$tex_file" ]; then
+            filename="${tex_file%.tex}"
+            compile "$filename"
+        fi
+    done
+else
+    # Compile the provided file
+    compile "$1"
+fi
