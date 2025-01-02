@@ -2,7 +2,6 @@ package parsers
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"strings"
 )
@@ -21,46 +20,42 @@ type Parser struct {
 	output       string
 }
 
+var hyprland = Parser{
+	files: []string{"~/dotfiles/hypr/.config/hypr/hyprland/keybinds.conf"},
+	pattern: func(line string, translations map[string]string) (Bind, bool) {
+		split := strings.Split(line, "=")
+		if strings.Trim(split[0], " ") != "bind" {
+			return Bind{}, false
+		}
+
+		contents := translate(split[1], translations)
+
+		args := strings.Split(contents, ",")
+
+		if len(args) <= 3 {
+			return Bind{
+				mods:   strings.Split(strings.Trim(args[0], " "), "_"),
+				keys:   strings.Split(strings.Trim(args[1], " "), "_"),
+				action: strings.Trim(args[2], " "),
+			}, true
+		} else {
+			return Bind{
+				mods:   strings.Split(strings.Trim(args[0], " "), "_"),
+				keys:   strings.Split(strings.Trim(args[1], " "), "_"),
+				action: strings.Trim(args[2]+": "+args[3], " "),
+			}, true
+		}
+	},
+	translations: map[string]string{
+		"$mods": "Mod_Shift",
+		"$modc": "Mod_Ctrl",
+		"$moda": "Mod_Alt",
+		"$mod":  "Mod",
+	},
+}
+
 var Parsers = map[string]Parser{
-	"hyprland": {
-		files: []string{"~/dotfiles/hypr/.config/hypr/hyprland/keybinds.conf"},
-		pattern: func(line string, translations map[string]string) (Bind, bool) {
-			split := strings.Split(line, "=")
-			if strings.Trim(split[0], " ") != "bind" {
-				return Bind{}, false
-			}
-
-			contents := translate(split[1], translations)
-
-			args := strings.Split(contents, ",")
-
-			if len(args) <= 3 {
-				return Bind{
-					mods:   strings.Split(strings.Trim(args[0], " "), "_"),
-					keys:   strings.Split(strings.Trim(args[1], " "), "_"),
-					action: strings.Trim(args[2], " "),
-				}, true
-			} else {
-				return Bind{
-					mods:   strings.Split(strings.Trim(args[0], " "), "_"),
-					keys:   strings.Split(strings.Trim(args[1], " "), "_"),
-					action: strings.Trim(args[2]+": "+args[3], " "),
-				}, true
-			}
-		},
-		translations: map[string]string{
-			"$mods": "Mod_Shift",
-			"$modc": "Mod_Ctrl",
-			"$moda": "Mod_Alt",
-			"$mod":  "Mod",
-		},
-	},
-	"zsh": {
-		files: []string{"~/.config/zsh/.zshrc", "~/.zshrc"},
-		translations: map[string]string{
-			"^M": "",
-		},
-	},
+	"hyprland": hyprland,
 }
 
 func fixString(str string) string {
@@ -73,7 +68,7 @@ func fixString(str string) string {
 	return str
 }
 
-func (p Parser) Compile() {
+func (p Parser) Compile() []Bind {
 
 	binds := []Bind{}
 
@@ -92,7 +87,7 @@ func (p Parser) Compile() {
 			}
 		}
 	}
-	fmt.Println(binds)
+	return binds
 }
 
 func (p Parser) Render() {

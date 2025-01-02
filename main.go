@@ -31,9 +31,10 @@ func main() {
 
 	switch opt.action {
 	case "compile":
-		parsers.Parsers[opt.parser].Compile()
+		compileOption(opt.parser, opt.files)
 		break
 	case "render":
+		renderOption(opt.parser, opt.files)
 		break
 	default:
 		fmt.Println("This action doesnt exist")
@@ -42,4 +43,15 @@ func main() {
 	}
 
 	fmt.Print(opt)
+}
+
+func compileOption(parser string, files []string) {
+	p := parsers.Parsers[parser]
+	if len(files) > 0 {
+	}
+	binds := p.Compile()
+	fmt.Print(binds)
+}
+
+func renderOption(parser string, files []string) {
 }

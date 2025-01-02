@@ -1,0 +1,4 @@
+name = "hyprland"
+files = ["~/.config/hypr/hyprland.conf"]
+pattern = "^binde? = *$"
+replace = "^binde? = "
